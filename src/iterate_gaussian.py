@@ -14,7 +14,7 @@ from numpy.linalg import norm
 from scipy.optimize import minimize
 
 
-def iter_g0(zern, inds, imgs, theta, Sk0, c0, ff, max_iter = 10, show = True):  #perform gaussian iterations
+def iter_g0(zern, inds, imgs, theta, Sk0, c0, ff, max_iter = 10, show = False):  #perform gaussian iterations
     if show: print("\n")
     
     start = time.time()

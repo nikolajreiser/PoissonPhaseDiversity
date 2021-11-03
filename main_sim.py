@@ -33,7 +33,7 @@ l2p = 2*np.pi/l #length to phase
 
 dsize = 512
 dim0 = (dsize, dsize)
-num_imgs = 2
+num_imgs = 3
 num_phi = 42
 rotang = 0
 
@@ -71,12 +71,12 @@ theta0 = np.zeros((num_imgs, num_theta))
 
 zern0, R0, Theta, inds0, = get_zern(dsize, pupilSize, pixelSize, num_phi)
 theta = get_theta(theta0, zern0)
-theta = defocus(np.array([-div_mag, div_mag])/l, R0, inds0)
+theta = defocus(np.array([-div_mag, div_mag, 0])/l, R0, inds0)
 dim = (imsize,imsize)
 
 zern, R, Theta, inds = get_zern(imsize, pupilSize, pixelSize*2, num_c)
 theta1 = get_theta(theta0, zern[:num_c])
-theta1 = defocus(np.array([-div_mag, div_mag])/l, R, inds)
+theta1 = defocus(np.array([-div_mag, div_mag, 0])/l, R, inds)
 
 ff = Fast_FFTs(imsize, num_imgs, 1)
 

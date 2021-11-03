@@ -38,3 +38,15 @@ def load_data(data_dir, v = -1):
         datas.append(np.load(p/d))
     
     return datas
+
+def bin_data(inds, bins, data):
+    
+    out = [[] for i in range(len(bins)-1)]
+    for(ind, val) in zip(inds, data):
+        out[ind-1].append(val)
+        
+    return out
+
+def moving_average(a, w=3) :
+    n = len(a)
+    return [a[max(0, i-w):min(n, i+w)].mean() for i in range(n)]
