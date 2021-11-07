@@ -37,6 +37,8 @@ with st.sidebar.expander(label = "Algorithm Settings"):
     num_imgs = int(st.number_input(label = "# of images", min_value = 2, step = 1, value = 3))
     algo = st.radio(label = "Algorithm Type:", options = ("Poisson", "Gaussian"))
     div_type = st.radio(label = "Diversity Phase Type:", options = ("Defocus", "Zernike Polynomials"))
+    if div_type == "Zernike Polynomials":
+        st.radio(label = "Zernike Indexing:", options = ("Noll", "ANSI", "Fringe", "Wyant"))
 
 num_phases = [None for i in range(num_imgs)]
 use_im = [None for i in range(num_imgs)]

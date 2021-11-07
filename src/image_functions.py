@@ -33,12 +33,10 @@ def get_theta(theta_coef, zern):
     theta = np.exp(1j*texp)
     return theta
 
-def defocus(z, R, inds):
-    RI = 1.33
-    l = .532
+def defocus(z, R, inds, NA, l, RI):
 
     gamma = np.zeros(len(inds))
-    gamma = (2*np.pi*RI/l)*np.sqrt(1-(l*R/RI)**2)
+    gamma = (2*np.pi*RI/l)*np.sqrt(1-(NA*R/RI)**2)
     
     if type(z) == float:
         return np.exp(1j*z*gamma)

@@ -21,7 +21,6 @@ sdist/
 var/
 wheels/
 wisdom/
-plotting/data/
 pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/

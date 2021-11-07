@@ -23,7 +23,7 @@ ax2.errorbar(noise_vals, errs_p.mean(axis = 1), c = 'black', ls = '--', yerr = e
 
 ax.errorbar(noise_vals*4/3, error_im_perf.mean(axis = 1), yerr = error_im_perf.std(axis = 1)/np.sqrt(num_points), label = 'Ideal Correction')
 ax.errorbar(noise_vals*4/3, error_im_corr.mean(axis = 1), yerr = error_im_corr.std(axis = 1)/np.sqrt(num_points), label = 'Estimated Correction')
-ax.errorbar(noise_vals, error_decon.mean(axis = 1), yerr = error_decon.std(axis = 1)/num_points, label = 'Deconvolved')
+ax.errorbar(noise_vals,     error_decon.mean(axis = 1),   yerr = error_decon.std(axis = 1)/np.sqrt(num_points),   label = 'Deconvolved')
 ax.errorbar(noise_vals*4/3, error_im_aber.mean(axis = 1), yerr = error_im_aber.std(axis = 1)/np.sqrt(num_points), label = 'Aberrated')
 
 

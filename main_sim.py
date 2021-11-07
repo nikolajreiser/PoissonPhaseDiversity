@@ -15,7 +15,7 @@ from src.iterate_gaussian import iter_g0
 from src.sim_im import sim_im, sim_im_2, sim_im_3, add_noise
 from src.zern import get_zern
 import matplotlib.pyplot as plt
-from src.image_functions import get_theta, scl_imgs, ift, sft, defocus, errA
+from src.image_functions import get_theta, scl, ift, sft, defocus, errA, imshow
 from src.fast_fft import Fast_FFTs
 from src.zern import normalize
 from src.sim_cell import cell_multi
@@ -43,13 +43,14 @@ imsize = 256
 num_c = 12
 
 num_theta = num_c
-div_mag = 6
-# div_mag *= 2*np.pi #convert waves to radians
+div_mag = 2 #for defocus, this is distance from focal plane in waves
+div_mag *= l #convert waves to um
+# div_mag *= l2p*NA**2/(4*RI) #convert um to radians. Extra factor of NA^2/4RI is because of Zernike defocus approximation (see 10.1364/JOSAA.37.000016)
 theta0 = np.zeros((num_imgs, num_theta))
 
 
-# theta0[0,0] = div_mag
-# theta0[1,0] = -div_mag
+theta0[0,0] = div_mag
+theta0[1,0] = -div_mag
 
 
 # theta0[0,1] = div_mag
@@ -71,17 +72,15 @@ theta0 = np.zeros((num_imgs, num_theta))
 
 zern0, R0, Theta, inds0, = get_zern(dsize, pupilSize, pixelSize, num_phi)
 theta = get_theta(theta0, zern0)
-theta = defocus(np.array([-div_mag, div_mag, 0])/l, R0, inds0)
+theta = defocus(np.array([-div_mag, div_mag, 0]), R0, inds0, NA, l, RI)
 dim = (imsize,imsize)
 
 zern, R, Theta, inds = get_zern(imsize, pupilSize, pixelSize*2, num_c)
 theta1 = get_theta(theta0, zern[:num_c])
-theta1 = defocus(np.array([-div_mag, div_mag, 0])/l, R, inds)
+theta1 = defocus(np.array([-div_mag, div_mag, 0]), R, inds, NA, l, RI)
 
 ff = Fast_FFTs(imsize, num_imgs, 1)
 
-# ob = create_ob(dim0)
-# ob = np.float64(imread("objects/bubbles.tif", True))
 
 # ob = cell_multi(dsize*2, 300, (10, 60), e = .7, overlap = .2)
 ob = cell_multi(dsize*2, 400, (30, 60), e = .7, overlap = .05)
@@ -94,7 +93,6 @@ ob = cell_multi(dsize*2, 400, (30, 60), e = .7, overlap = .05)
 # ob = cell_multi(dsize//2, 10, (11, 12),  a = 0, b = 0, e = 1, texture_sigma = 5, edge_sigma = 0, overlap = .5)
 # w = int(dsize*3/4)
 # ob = np.pad(ob, ((w, w), (w, w)))
-
 show = True
 abmag0 = 2
 abmag1 = abmag0/2
@@ -127,17 +125,17 @@ imgs0 = sim_im_2(ob, dim0, phi, num_imgs, theta, zern0, R0, inds0)
 # imgs0 = sim_im_3d_1(ob, dim0, phi, num_imgs, theta, zern0, R0, inds0)
 # snr, imgs0 = add_noise(imgs0, num_photons = num_photons, dark_noise = 100, read_noise = 20)
 snr, imgs0 = add_noise(imgs0, num_photons = num_photons, dark_noise = 1, read_noise = 2)
-imgs0[-1] /= pf
+# imgs0[-1] /= pf
 # print(f"SNR: {snr:.2f}")
 
 # imshow(imgs0[-1])
-# imshow(np.reshape(imgs0, ((dsize*num_imgs, dsize))).T)
+imshow(np.reshape(imgs0, ((dsize*num_imgs, dsize))).T)
 
 imgs = dlm(imgs0, (1, 2, 2))
 # imshow(np.reshape(imgs, ((imsize*num_imgs, imsize))).T)
 
 # if imsize == dsize: imgs = imgs0
-imgs = scl_imgs(imgs)
+imgs = scl(imgs)
 
 # else:  
 #     lx, ly = metric_loc(imgs0, imsize, 16)

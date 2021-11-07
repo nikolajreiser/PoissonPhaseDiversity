@@ -49,8 +49,8 @@ dim = (imsize,imsize)
 ff = Fast_FFTs(imsize, num_imgs, 1)
 
 
-div_mag = 6
-
+div_mag = 1
+div_mag *= l #convert waves to um
 
 # ob = cell_multi(dsize*2, 300, (10, 60), e = .7, overlap = .2)
 # obname = "ob1"
@@ -58,11 +58,11 @@ div_mag = 6
 # ob = cell_multi(dsize*2, 400, (30, 60), e = .7, overlap = .05)
 # obname = "ob2"
 
-# ob = cell_multi(dsize*2, 1000, (30, 60), e = .1, overlap = .5)
-# obname = "ob3"
+ob = cell_multi(dsize*2, 1000, (30, 60), e = .1, overlap = .5)
+obname = "ob3"
 
-ob = cell_multi(dsize*2, 100, (10, 15), e = 1, overlap = .5)
-obname = "ob4"
+# ob = cell_multi(dsize*2, 100, (10, 15), e = 1, overlap = .5)
+# obname = "ob4"
 
 
 
@@ -71,10 +71,10 @@ show = False
 print(obname)
 
 
-theta = defocus(np.array([-div_mag, div_mag, 0])/l, R0, inds0)
+theta = defocus(np.array([-div_mag, div_mag, 0]), R0, inds0, NA, l, RI)
 
 abmags = np.linspace(0, 8, 11)/2
-num_points = 100
+num_points = 10
 errs_g = np.zeros((len(abmags), num_points))
 errs_p = np.zeros((len(abmags), num_points))
 aber_imgs = np.zeros((len(abmags), imsize, imsize))

@@ -19,8 +19,8 @@ def zernfringe2nm(j0, numskip):  #technically fringe-1, so starting at j = 0
     n = 2*(d-1)-np.abs(m)     
     
     return n, m
-
-     
+    
+#stolen from https://blog.joey-dumont.ca/zernike-polynomials-coefficients/
 def zernnoll2nm(j0, numskip):  #technically noll -1, so starting at j = 0
 
     j = j0 + numskip + 1
@@ -35,16 +35,25 @@ def zernnoll2nm(j0, numskip):  #technically noll -1, so starting at j = 0
 
     return n, m
 
+    
+def zernansi2nm(j0, numskip):
+    
+    j = j0 + numskip
+    n = np.uint16(np.ceil((np.sqrt(9+8*j)-3)/2))
+    m = 2*j-n*(n+2)
+    
+    return n, m
+
 def zernnm2ansi(nm, offset):
     n, m = nm
     j = (n*(n+2)+m)/2
     return np.int32(j-offset)
     
 
-def zernfun(j, dim, pupilSize, pixelSize, rotang = 0, numskip = 3):
+def zernfun(j, dim, pupilSize, pixelSize, indexing, rotang, numskip):
     
     r, theta, inds = pupil(dim, pupilSize, pixelSize, rotang)
-    n, m = zernnoll2nm(j, numskip)
+    n, m = indexing(j, numskip)
 
     Rmn = zern_r(n, m, r)
     ang = zern_theta(m, theta)
@@ -107,9 +116,9 @@ def normalize(j, numskip = 3):
     A = (2/eps(m))*(n+1)
     return np.float64(A)
 
-def get_zern(dsize, pupilSize, pixelSize, num_c, rotang = 0, numskip = 3, p2 = False):
+def get_zern(dsize, pupilSize, pixelSize, num_c, rotang = 0, numskip = 3, p2 = False, indexing = zernnoll2nm):
     
-    zern = np.array([zernfun(i, dsize, pupilSize, pixelSize, rotang, numskip) 
+    zern = np.array([zernfun(i, dsize, pupilSize, pixelSize, indexing, rotang, numskip) 
                      for i in range(num_c)])
     
     return (zern,) + pupil(dsize, pupilSize, pixelSize, rotang, p2)

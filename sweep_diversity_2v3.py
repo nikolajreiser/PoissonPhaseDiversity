@@ -65,8 +65,9 @@ print(obname)
 
 
 
-div_mags = np.linspace(1, 10, 10) #in units of waves
-num_points = 100
+div_mags = np.linspace(3, 0, 10, False) #in units of waves
+div_mags *= l #convert waves to um
+num_points = 10
 
 errs_g = np.zeros((len(div_mags), num_points))
 errs_p = np.zeros((len(div_mags), num_points))
@@ -83,7 +84,7 @@ for i, div_mag in enumerate(div_mags):
     for j in range(num_points):
         progress(f"{i+1}/{len(div_mags)} \t {j+1}/{num_points}")
 
-        theta = defocus(np.array([-div_mag, div_mag, 0])/l, R, inds)
+        theta = defocus(np.array([-div_mag, div_mag, 0]), R, inds, NA, l, RI)
         
         
         show = False
@@ -118,12 +119,12 @@ for i, div_mag in enumerate(div_mags):
         c2, cost2, num_iter2, sss = iter_p(zern[:num_c], inds, imgs, theta, Sk0, c0.copy(), ff, show)
         errs_p[i, j] = errA(c2, phi0*2*np.pi, show)
         
-        c1_2, wob1, g_cist = iter_g0(zern[:num_c], inds, imgs[:-1], theta[:-1], Sk0, c0, ff_2, 100, show)
-        errs_g_2[i, j] = errA(c1_2, phi0*2*np.pi, show)
-        c2_2, cost2, num_iter2, sss = iter_p(zern[:num_c], inds, imgs[:-1], theta[:-1], Sk0, c0.copy(), ff_2, show)
-        errs_p_2[i, j] = errA(c2_2, phi0*2*np.pi, show)
+        # c1_2, wob1, g_cist = iter_g0(zern[:num_c], inds, imgs[:-1], theta[:-1], Sk0, c0, ff_2, 100, show)
+        # errs_g_2[i, j] = errA(c1_2, phi0*2*np.pi, show)
+        # c2_2, cost2, num_iter2, sss = iter_p(zern[:num_c], inds, imgs[:-1], theta[:-1], Sk0, c0.copy(), ff_2, show)
+        # errs_p_2[i, j] = errA(c2_2, phi0*2*np.pi, show)
 
-save_data(f'sweep_diversity_2v3_{obname}', div_mags, errs_g, errs_p, errs_g_2, errs_p_2)
+save_data(f'sweep_diversity_2v3_{obname}_{abmag0}', div_mags, errs_g, errs_p, errs_g_2, errs_p_2)
 
 
 

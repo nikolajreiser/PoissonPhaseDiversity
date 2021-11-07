@@ -37,8 +37,9 @@ show = False
 num_c = 12
 
 num_theta = num_c
-div_mag = 3
-tm = np.array([-div_mag, div_mag, 0])/l
+div_mag = 1
+div_mag *= l #convert waves to um
+tm = np.array([-div_mag, div_mag, 0])
 
 num_photons = 500
 dark_noise = 1
@@ -56,17 +57,17 @@ z_128d, R_128d, T_128d, i_128d = get_zern(128, pupilSize, pixelSize*2, num_phi)
 z_256d, R_256d, T_256d, i_256d = get_zern(256, pupilSize, pixelSize*2, num_phi)
 z_512d, R_512d, T_512d, i_512d = get_zern(512, pupilSize, pixelSize*2, num_phi)
 
-t_64 = defocus(tm, R_64, i_64)
-t_128 = defocus(tm, R_128, i_128) 
-t_256 = defocus(tm, R_256, i_256) 
-t_512 = defocus(tm, R_512, i_512) 
-t_1024 = defocus(tm, R_1024, i_1024) 
+t_64 = defocus(tm, R_64, i_64, NA, l, RI)
+t_128 = defocus(tm, R_128, i_128, NA, l, RI)
+t_256 = defocus(tm, R_256, i_256, NA, l, RI)
+t_512 = defocus(tm, R_512, i_512, NA, l, RI)
+t_1024 = defocus(tm, R_1024, i_1024, NA, l, RI)
 
-t_32d = defocus(tm, R_32d, i_32d) 
-t_64d = defocus(tm, R_64d, i_64d)
-t_128d = defocus(tm, R_128d, i_128d) 
-t_256d = defocus(tm, R_256d, i_256d) 
-t_512d = defocus(tm, R_512d, i_512d) 
+t_32d = defocus(tm, R_32d, i_32d, NA, l, RI)
+t_64d = defocus(tm, R_64d, i_64d, NA, l, RI)
+t_128d = defocus(tm, R_128d, i_128d, NA, l, RI)
+t_256d = defocus(tm, R_256d, i_256d, NA, l, RI)
+t_512d = defocus(tm, R_512d, i_512d, NA, l, RI)
 
 ff_32 = Fast_FFTs(32, num_imgs, 1)
 ff_64 = Fast_FFTs(64, num_imgs, 1)
@@ -85,7 +86,7 @@ ob_64 =  dlm(ob_128, (2, 2))
 abmag0 = 2
 abmag1 = abmag0/2
 
-num_points = 100
+num_points = 10
 errs_gn = np.zeros((5, num_points))
 errs_gd = np.zeros((5, num_points))
 errs_pn = np.zeros((5, num_points))

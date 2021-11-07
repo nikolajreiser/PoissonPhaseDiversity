@@ -10,7 +10,7 @@ import numpy as np
 from functions import load_data
 
 
-abmags, errs_g, errs_p = load_data('sweep_magnitude_single_ob4')
+abmags, errs_g, errs_p = load_data('sweep_magnitude_single_ob2')
 num_points = 100
 
 fig, ax = plt.subplots()

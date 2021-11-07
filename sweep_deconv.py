@@ -50,7 +50,9 @@ dim = (imsize,imsize)
 ff = Fast_FFTs(imsize, num_imgs, 1)
 
 
-div_mag = 6
+div_mag = 1
+div_mag *= l #convert waves to um
+
 obname = "cells"
 abmag0 = 2
 abmag1 = abmag0/2
@@ -74,11 +76,11 @@ show = False
 print(obname)
 
 
-theta = defocus(np.array([-div_mag, div_mag, 0])/l, R0, inds0)
+theta = defocus(np.array([-div_mag, div_mag, 0]), R0, inds0, NA, l, RI)
 
 
 noise_vals = 10**(np.linspace(1, 5, 10))
-num_points = 100
+num_points = 10
 errs_g = np.zeros((len(noise_vals), num_points))
 errs_p = np.zeros((len(noise_vals), num_points))
 error_decon = np.zeros((len(noise_vals), num_points))

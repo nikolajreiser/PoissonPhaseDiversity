@@ -17,7 +17,7 @@ errs_pn, errs_pd, errs_gn, errs_gd, time_pn, time_pd, time_gn, time_gd = load_da
 ticks = [r'$64^2$', r'$128^2$', r'$256^2$', r'$512^2$', r'$1024^2$']
 pos = np.arange(len(ticks))*5
 
-if True:
+if False:
     def set_box_color(bp, color, solid = True):
         if solid: 
             plt.setp(bp['boxes'], color=color)
@@ -79,17 +79,17 @@ if True:
     ax2.set_xticks(pos)
     ax2.set_xticklabels(ticks)
     
-if False:
-    def set_box_color(bp, color, solid = True):
+if True:
+    def set_box_color(bp, color, solid = True, lw = 1):
         if solid: 
-            plt.setp(bp['bodies'], color=color)
-            plt.setp(bp['cbars'], color=color)
+            plt.setp(bp['cbars'], color=color, linewidth = lw)
         else: 
-            plt.setp(bp['bodies'], color=color, linestyle = 'dashed')
-            plt.setp(bp['cbars'], color=color, linestyle = 'dashed')
-        plt.setp(bp['cmins'], color=color)
-        plt.setp(bp['cmaxes'], color=color)
-        plt.setp(bp['cmeans'], color=color)
+            plt.setp(bp['cbars'], color=color, linewidth = lw, linestyle = 'dashed')
+            
+        plt.setp(bp['bodies'], color=color)
+        plt.setp(bp['cmins'], color=color, linewidth = lw)
+        plt.setp(bp['cmaxes'], color=color, linewidth = lw)
+        plt.setp(bp['cmeans'], color=color, linewidth = lw)
         
     fig, ax = plt.subplots()
     
@@ -113,7 +113,7 @@ if False:
     
     fig.legend(loc = 'upper right', bbox_to_anchor=(.9, .88), fontsize = 8)
     ax.set_ylabel(r"RWE ($\lambda$)")
-    ax.set_ylim(.07, 4)
+    ax.set_ylim(.07, 5)
     ax.set_xlabel("Image Size (pixels)")
     ax.set_yscale('log')
     ax.set_xticks(pos)
@@ -142,5 +142,5 @@ if False:
     ax2.set_xlabel("Image Size (pixels)")
     ax2.set_yscale('log')
     ax2.set_xticks(pos)
-    # ax2.set_xticklabels(ticks)
+    ax2.set_xticklabels(ticks)
 
