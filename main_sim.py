@@ -39,7 +39,7 @@ rotang = 0
 
 seed(1)
 
-imsize = 256
+imsize = 512
 num_c = 12
 
 num_theta = num_c
@@ -74,11 +74,12 @@ zern0, R0, Theta, inds0, = get_zern(dsize, pupilSize, pixelSize, num_phi)
 # theta = get_theta(theta0, zern0)
 theta = defocus(np.array([-div_mag, div_mag, 0]), R0, inds0, NA, l, RI)
 
-zern, R, Theta, inds = get_zern(imsize, pupilSize, pixelSize*2, num_c)
+zern, R, Theta, inds = get_zern(imsize, pupilSize, pixelSize, num_c)
 # theta1 = get_theta(theta0, zern[:num_c])
 theta1 = defocus(np.array([-div_mag, div_mag, 0]), R, inds, NA, l, RI)
 
 ff = Fast_FFTs(imsize, num_imgs, 1)
+ff2 = Fast_FFTs(imsize, 2, 1)
 
 
 # ob = cell_multi(dsize*2, 300, (10, 60), e = .7, overlap = .2)
@@ -123,14 +124,14 @@ imgs0 = sim_im_2(ob, dim0, phi, num_imgs, theta, zern0, R0, inds0)
 # imgs0 = sim_im_3d_2(ob, dim0, phi, num_imgs, theta, zern0, R0, inds0)
 # imgs0 = sim_im_3d_1(ob, dim0, phi, num_imgs, theta, zern0, R0, inds0)
 # snr, imgs0 = add_noise(imgs0, num_photons = num_photons, dark_noise = 100, read_noise = 20)
-snr, imgs0 = add_noise(imgs0, num_photons = num_photons, dark_noise = 1, read_noise = 2)
+snr, imgs = add_noise(imgs0, num_photons = num_photons, dark_noise = 1, read_noise = 2)
 # imgs0[-1] /= pf
 # print(f"SNR: {snr:.2f}")
 
 # imshow(imgs0[-1])
-imshow(np.reshape(imgs0, ((dsize*num_imgs, dsize))).T)
+imshow(np.reshape(imgs, ((dsize*num_imgs, dsize))).T)
 
-imgs = dlm(imgs0, (1, 2, 2))
+# imgs = dlm(imgs0, (1, 2, 2))
 # imshow(np.reshape(imgs, ((imsize*num_imgs, imsize))).T)
 
 # if imsize == dsize: imgs = imgs0
@@ -147,9 +148,9 @@ imgs = scl(imgs)
 
 c0 = np.zeros((num_c))+1e-10
 
-c1, wob1, g_cist = iter_g0(zern[:num_c], inds, imgs, theta1, Sk0, c0, ff, 100, show)
+c1, wob1, g_cist = iter_g0(zern[:num_c], inds, imgs[1:], theta1[1:], Sk0, c0, ff2, 100, show)
 eg = errA(c1, phi0*2*np.pi, show)
-c2, cost2, num_iter2, sss = iter_p(zern[:num_c], inds, imgs, theta1, Sk0, c0.copy(), ff, show)
+c2, cost2, num_iter2, sss = iter_p(zern[:num_c], inds, imgs[1:], theta1[1:], Sk0, c0.copy(), ff2, show)
 
 # c2, cost2, num_iter2, sss = iter_p2(zern[:num_c], inds, imgs, theta1, Sk0, c0.copy(), ff, show)
 

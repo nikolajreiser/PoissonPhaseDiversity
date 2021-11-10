@@ -22,12 +22,13 @@ from src.streamlit_functions import run_estimation
 from PIL import Image
 import pandas as pd
 
+st.set_page_config(layout="wide")
 st.title('Phase Diversity')
 
 link = '[Usage and code on github](http://github.com/nikolajreiser/PoissonPhaseDiversity)'
 st.sidebar.markdown(link, unsafe_allow_html=True)
 
-st.sidebar.write("When closing and opening expanders, the values inside get erased because of a streamlit bug so be careful")
+st.sidebar.write("When closing and opening expanders, the numeric values inside get reset because of a streamlit bug so be careful")
 
 with st.sidebar.expander(label = "Microscope Settings"):
     NA = st.number_input(label = "NA", min_value = 0.0, value  = 1.2, step = 0.1)
@@ -43,7 +44,7 @@ with st.sidebar.expander(label = "Algorithm Settings"):
     algo = st.radio(label = "Algorithm Type:", options = ("Poisson", "Gaussian"))
     div_type = st.radio(label = "Diversity Phase Type:", options = ("Defocus", "Zernike Polynomials"))
     if div_type == "Zernike Polynomials":
-        st.radio(label = "Zernike Indexing:", options = ("Noll", "ANSI", "Fringe", "Wyant"))
+        indexing = st.radio(label = "Zernike Indexing:", options = ("Noll", "ANSI", "Fringe", "Wyant"))
 
 num_phases = [None for i in range(num_imgs)]
 use_im = [None for i in range(num_imgs)]
@@ -76,12 +77,12 @@ for i in range(num_imgs):
 
         if div_type == "Zernike Polynomials":
             num_phases[i] = int(st.number_input(label = "# of diversity phases", min_value = 1, step = 1, value = 1, key = f"num_phases{i}"))
-            
+
             zern_idx[i] = [None for i in range(num_phases[i])]
             zern_str[i] = [None for i in range(num_phases[i])]
 
             for j in range(num_phases[i]):
-                zern_idx[i][j] = st.number_input(label = f"Diversity Phase {j+1} Polynomial Index (Noll)", min_value = 4, value = 4, step = 1, key = f"diversity_index{i},{j}")
+                zern_idx[i][j] = st.number_input(label = f"Diversity Phase {j+1} Polynomial Index ({indexing})", min_value = 4, value = 4, step = 1, key = f"diversity_index{i},{j}")
                 n_temp, m_temp = zn2nm(zern_idx[i][j], -1)
                 st.write(f"n = {n_temp}, m = {m_temp}")
                 zern_str[i][j] = st.number_input(label = f"Diversity Phase {j+1} Amount ({units})", value  = 0.0, key = f"diversity{i},{j}")
@@ -108,7 +109,8 @@ if estimate_button:
         c0 = np.zeros((num_c))+1e-10
         
         if div_type == "Defocus":
-            theta1 = defocus(np.array([defocuses[i] for i in im_inds]), R, inds, NA, l, RI)
+            def_vals = def_con[units]*np.array([defocuses[i] for i in im_inds])
+            theta1 = defocus(def_vals, R, inds, NA, l, RI)
             
         if div_type == "Zernike Polynomials":
             
@@ -127,8 +129,10 @@ if estimate_button:
         if algo == "Gaussian":
             c = iter_g0(zern, inds, imgs_temp, theta1, Sk0, c0.copy(), ff, 100)[0]
             
-        # new_col = pd.DataFrame(c)#, index = np.arange(num_c)+4) #can take this approach when streamlit finally lets arrows on number_input be removed
         st.session_state.cs.append(c)
 
-df = pd.DataFrame(data = st.session_state.cs, columns = [f"{j+4}{zn2nm(j, 3)}" for j in range(num_c)])
-st.table(df.style.format("{:.2f}"))
+df = pd.DataFrame(data = st.session_state.cs, columns = [[f"{j}" for j in range(num_c)],
+                                                         [f"{zn2nm(j, 3)[1]}, {zn2nm(j, 3)[0]}" for j in range(num_c)]])
+
+with st.expander("Previous Results"):
+    st.table(df.style.format("{:.2f}"))
