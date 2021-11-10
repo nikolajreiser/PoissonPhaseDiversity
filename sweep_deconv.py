@@ -21,6 +21,9 @@ from skimage.transform import downscale_local_mean as dlm
 from deconvolution.deconv import rl
 from skimage.metrics import structural_similarity as ssim
 
+#DONT FORGET TO RUN find . -size +100M | cat >> .gitignore
+#afterwards
+print(f"DONT FORGET TO RUN find . -size +100M | cat >> .gitignore")
 
 #precompute pupil and zernike polynomials
 pixelSize = .096

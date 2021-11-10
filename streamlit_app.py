@@ -23,7 +23,11 @@ from PIL import Image
 import pandas as pd
 
 st.title('Phase Diversity')
-st.text("When closing and opening expanders, the values inside get erased because of a streamlit bug so be careful")
+
+link = '[Usage and code on github](http://github.com/nikolajreiser/PoissonPhaseDiversity)'
+st.sidebar.markdown(link, unsafe_allow_html=True)
+
+st.sidebar.write("When closing and opening expanders, the values inside get erased because of a streamlit bug so be careful")
 
 with st.sidebar.expander(label = "Microscope Settings"):
     NA = st.number_input(label = "NA", min_value = 0.0, value  = 1.2, step = 0.1)
@@ -68,7 +72,7 @@ for i in range(num_imgs):
         
         # specify diversity phases
         if div_type == "Defocus":
-            defocuses[i] = st.number_input(label = "Defocus Amount (waves)", value = 0.0, key = f"defocus{i}")
+            defocuses[i] = st.number_input(label = f"Defocus Amount ({units})", value = 0.0, key = f"defocus{i}")
 
         if div_type == "Zernike Polynomials":
             num_phases[i] = int(st.number_input(label = "# of diversity phases", min_value = 1, step = 1, value = 1, key = f"num_phases{i}"))
@@ -80,7 +84,7 @@ for i in range(num_imgs):
                 zern_idx[i][j] = st.number_input(label = f"Diversity Phase {j+1} Polynomial Index (Noll)", min_value = 4, value = 4, step = 1, key = f"diversity_index{i},{j}")
                 n_temp, m_temp = zn2nm(zern_idx[i][j], -1)
                 st.write(f"n = {n_temp}, m = {m_temp}")
-                zern_str[i][j] = st.number_input(label = f"Diversity Phase {j+1} Amount (waves)", value  = 0.0, key = f"diversity{i},{j}")
+                zern_str[i][j] = st.number_input(label = f"Diversity Phase {j+1} Amount ({units})", value  = 0.0, key = f"diversity{i},{j}")
         
 estimate_button = st.button("Run Estimation")
 
@@ -94,16 +98,17 @@ if estimate_button:
     with st.spinner("Calculating ..."):
         
         im_inds = [i for i in range(len(use_im)) if use_im[i] == True]
+        imgs_temp = np.array([imgs[i] for i in im_inds])
     
         imsize = imgs[0].shape[0]
-        ff = Fast_FFTs(imsize, num_imgs, 1)
+        ff = Fast_FFTs(imsize, len(im_inds), 1)
     
         zern, R, Theta, inds = get_zern(imsize, pupilSize, pixelSize, num_c)
         
         c0 = np.zeros((num_c))+1e-10
         
         if div_type == "Defocus":
-            theta1 = defocus(np.array(defocuses[im_inds]), R, inds, NA, l, RI)
+            theta1 = defocus(np.array([defocuses[i] for i in im_inds]), R, inds, NA, l, RI)
             
         if div_type == "Zernike Polynomials":
             
@@ -117,12 +122,12 @@ if estimate_button:
             get_theta(theta0, zern)
     
         if algo == "Poisson":
-            c = iter_p(zern, inds, np.array(imgs[im_inds]), theta1, Sk0, c0.copy(), ff)[0]
+            c = iter_p(zern, inds, imgs_temp, theta1, Sk0, c0.copy(), ff)[0]
     
         if algo == "Gaussian":
-            c = iter_g0(zern, inds, np.array(imgs[im_inds]), theta1, Sk0, c0.copy(), ff, 100)[0]
+            c = iter_g0(zern, inds, imgs_temp, theta1, Sk0, c0.copy(), ff, 100)[0]
             
-        # new_col = pd.DataFrame(c)#, index = np.arange(num_c)+4) #can take this approach when streamlit finally lets arrows on number_input to be removed
+        # new_col = pd.DataFrame(c)#, index = np.arange(num_c)+4) #can take this approach when streamlit finally lets arrows on number_input be removed
         st.session_state.cs.append(c)
 
 df = pd.DataFrame(data = st.session_state.cs, columns = [f"{j+4}{zn2nm(j, 3)}" for j in range(num_c)])
