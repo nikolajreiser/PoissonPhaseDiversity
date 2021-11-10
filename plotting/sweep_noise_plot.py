@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from functions import load_data
 
-noise_vals, errs_g, errs_p, read_noises = load_data('sweep_noise_ob1')
+noise_vals, errs_g, errs_p, read_noises = load_data('sweep_noise_ob4')
 num_points = 100
 
 

@@ -48,7 +48,7 @@ if False:
     
     fig.legend(loc = 'upper right', bbox_to_anchor=(.9, .88))
     ax.set_ylabel(r"RWE ($\lambda$)")
-    ax.set_ylim(.07, 4)
+    ax.set_ylim(.2, 3)
     ax.set_xlabel("Image Size (pixels)")
     ax.set_yscale('log')
     ax.set_xticks(pos)
@@ -111,9 +111,9 @@ if True:
     ax.plot([], c='blue', linestyle = 'dashed', label='Poisson, Downscaled')
     ax.plot([], c='orange', linestyle = 'dashed', label='Gaussian, Downscaled')
     
-    fig.legend(loc = 'upper right', bbox_to_anchor=(.9, .88), fontsize = 8)
+    fig.legend(loc = 'lower left', bbox_to_anchor=(.12, .12), fontsize = 8)
     ax.set_ylabel(r"RWE ($\lambda$)")
-    ax.set_ylim(.07, 5)
+    ax.set_ylim(.1, 6)
     ax.set_xlabel("Image Size (pixels)")
     ax.set_yscale('log')
     ax.set_xticks(pos)

@@ -34,19 +34,20 @@ num_imgs = 3
 num_phi = 42
 rotang = 0
 
-seed(1)
+seed(4)
 
 imsize = 256
 num_c = 12
 
 num_theta = num_c
-div_mag = 6
+div_mag = 1
+div_mag *= l #convert from waves to um
 
 zern, R, Theta, inds = get_zern(imsize, pupilSize*2, pixelSize, num_c)
 zern0, R0, Theta, inds0, = get_zern(dsize, pupilSize, pixelSize, num_phi)
 
-theta = defocus(np.array([-div_mag, div_mag, 0])/l, R, inds)
-theta0 = defocus(np.array([-div_mag, div_mag, 0])/l, R0, inds0)
+theta = defocus(np.array([-div_mag, div_mag, 0]), R, inds, NA, l, RI)
+theta0 = defocus(np.array([-div_mag, div_mag, 0]), R0, inds0, NA, l, RI)
 
 dim = (imsize,imsize)
 
@@ -67,6 +68,10 @@ obname = "ob2"
 show = True
 abmag0 = 2
 abmag1 = abmag0/2
+
+num_photons = 500
+dark_noise = 1
+read_noise = 2
 
 phi0 = (rand(num_c)*2-1)
 phi0 /= norm(phi0*np.sqrt(normalize(np.arange(num_c))))
@@ -90,6 +95,11 @@ imgs0 = sim_im(ob, dim0, phi_low_ord, num_imgs, theta0, zern0, R0, inds0)
 imgs1 = sim_im(ob, dim0, phi, num_imgs, theta0, zern0, R0, inds0)
 imgs2 = sim_im_2(ob, dim0, phi_low_ord, num_imgs, theta0, zern0, R0, inds0)
 imgs3 = sim_im_2(ob, dim0, phi, num_imgs, theta0, zern0, R0, inds0)
+
+snr, imgs0 = add_noise(imgs0, num_photons = num_photons, dark_noise = dark_noise, read_noise = read_noise)
+snr, imgs1 = add_noise(imgs1, num_photons = num_photons, dark_noise = dark_noise, read_noise = read_noise)
+snr, imgs2 = add_noise(imgs2, num_photons = num_photons, dark_noise = dark_noise, read_noise = read_noise)
+snr, imgs3 = add_noise(imgs3, num_photons = num_photons, dark_noise = dark_noise, read_noise = read_noise)
 
 
 imgs0 = dlm(imgs0, (1, 2, 2))

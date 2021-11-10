@@ -71,12 +71,11 @@ theta0[1,0] = -div_mag
 
 
 zern0, R0, Theta, inds0, = get_zern(dsize, pupilSize, pixelSize, num_phi)
-theta = get_theta(theta0, zern0)
+# theta = get_theta(theta0, zern0)
 theta = defocus(np.array([-div_mag, div_mag, 0]), R0, inds0, NA, l, RI)
-dim = (imsize,imsize)
 
 zern, R, Theta, inds = get_zern(imsize, pupilSize, pixelSize*2, num_c)
-theta1 = get_theta(theta0, zern[:num_c])
+# theta1 = get_theta(theta0, zern[:num_c])
 theta1 = defocus(np.array([-div_mag, div_mag, 0]), R, inds, NA, l, RI)
 
 ff = Fast_FFTs(imsize, num_imgs, 1)

@@ -119,10 +119,10 @@ for i, div_mag in enumerate(div_mags):
         c2, cost2, num_iter2, sss = iter_p(zern[:num_c], inds, imgs, theta, Sk0, c0.copy(), ff, show)
         errs_p[i, j] = errA(c2, phi0*2*np.pi, show)
         
-        # c1_2, wob1, g_cist = iter_g0(zern[:num_c], inds, imgs[:-1], theta[:-1], Sk0, c0, ff_2, 100, show)
-        # errs_g_2[i, j] = errA(c1_2, phi0*2*np.pi, show)
-        # c2_2, cost2, num_iter2, sss = iter_p(zern[:num_c], inds, imgs[:-1], theta[:-1], Sk0, c0.copy(), ff_2, show)
-        # errs_p_2[i, j] = errA(c2_2, phi0*2*np.pi, show)
+        c1_2, wob1, g_cist = iter_g0(zern[:num_c], inds, imgs[:-1], theta[:-1], Sk0, c0, ff_2, 100, show)
+        errs_g_2[i, j] = errA(c1_2, phi0*2*np.pi, show)
+        c2_2, cost2, num_iter2, sss = iter_p(zern[:num_c], inds, imgs[:-1], theta[:-1], Sk0, c0.copy(), ff_2, show)
+        errs_p_2[i, j] = errA(c2_2, phi0*2*np.pi, show)
 
 save_data(f'sweep_diversity_2v3_{obname}_{abmag0}', div_mags, errs_g, errs_p, errs_g_2, errs_p_2)
 

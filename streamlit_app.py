@@ -35,6 +35,7 @@ with st.sidebar.expander(label = "Microscope Settings"):
 with st.sidebar.expander(label = "Algorithm Settings"):
     num_c = int(st.number_input(label = "# of orders to estimate", min_value = 2, step = 1, value = 12))
     num_imgs = int(st.number_input(label = "# of images", min_value = 2, step = 1, value = 3))
+    units = st.radio(label = "Aberration Units", options = ("um", "waves", "radians"))
     algo = st.radio(label = "Algorithm Type:", options = ("Poisson", "Gaussian"))
     div_type = st.radio(label = "Diversity Phase Type:", options = ("Defocus", "Zernike Polynomials"))
     if div_type == "Zernike Polynomials":
@@ -83,12 +84,16 @@ for i in range(num_imgs):
         
 estimate_button = st.button("Run Estimation")
 
+pupilSize = NA/l
+Sk0 = np.pi*(pixelSize*pupilSize)**2
+l2p = 2*np.pi/l #length to phase
+def_con = {"um":1.0, "waves":l, "radians": 1.0/l2p}
+zern_con = {"um":l2p, "waves":2*np.pi, "radians":1.0}
+
 if estimate_button:
     with st.spinner("Calculating ..."):
-
-        pupilSize = NA/l
-        Sk0 = np.pi*(pixelSize*pupilSize)**2
-        l2p = 2*np.pi/l #length to phase
+        
+        im_inds = [i for i in range(len(use_im)) if use_im[i] == True]
     
         imsize = imgs[0].shape[0]
         ff = Fast_FFTs(imsize, num_imgs, 1)
@@ -98,7 +103,7 @@ if estimate_button:
         c0 = np.zeros((num_c))+1e-10
         
         if div_type == "Defocus":
-            theta1 = defocus(np.array(defocuses)/l, R, inds)
+            theta1 = defocus(np.array(defocuses[im_inds]), R, inds, NA, l, RI)
             
         if div_type == "Zernike Polynomials":
             
@@ -112,12 +117,12 @@ if estimate_button:
             get_theta(theta0, zern)
     
         if algo == "Poisson":
-            c = iter_p(zern, inds, np.array(imgs), theta1, Sk0, c0.copy(), ff)[0]
+            c = iter_p(zern, inds, np.array(imgs[im_inds]), theta1, Sk0, c0.copy(), ff)[0]
     
         if algo == "Gaussian":
-            c = iter_g0(zern, inds, np.array(imgs), theta1, Sk0, c0.copy(), ff, 100)[0]
+            c = iter_g0(zern, inds, np.array(imgs[im_inds]), theta1, Sk0, c0.copy(), ff, 100)[0]
             
-        # new_col = pd.DataFrame(c)#, index = np.arange(num_c)+4)
+        # new_col = pd.DataFrame(c)#, index = np.arange(num_c)+4) #can take this approach when streamlit finally lets arrows on number_input to be removed
         st.session_state.cs.append(c)
 
 df = pd.DataFrame(data = st.session_state.cs, columns = [f"{j+4}{zn2nm(j, 3)}" for j in range(num_c)])

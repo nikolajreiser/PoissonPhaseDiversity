@@ -37,7 +37,7 @@ show = False
 num_c = 12
 
 num_theta = num_c
-div_mag = 1
+div_mag = 2
 div_mag *= l #convert waves to um
 tm = np.array([-div_mag, div_mag, 0])
 

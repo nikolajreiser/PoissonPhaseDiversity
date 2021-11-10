@@ -54,8 +54,7 @@ def ift2(im): return scipy.fft.irfft2(im)
 
 
 
-def scl(im):
-    return np.divide(im-im.min(), im.max()-im.min())
+def scl(im,): return np.divide(im-im.min(), im.max()-im.min())
 
 def scl_imgs(imgs, i = True):
     if i:
@@ -199,6 +198,3 @@ def errA(c, phi, show = True):
 def progress(string):
     stdout.write("\r"+string)
     stdout.flush()
-
-    
-    
