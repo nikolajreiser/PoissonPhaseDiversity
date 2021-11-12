@@ -8,6 +8,7 @@ Created on Thu Apr  2 15:30:13 2020
 import numpy as np
 from scipy.special import comb
 
+
 def zernfringe2nm(j0, numskip):  #technically fringe-1, so starting at j = 0
     
     j = j0 + numskip + 1
@@ -18,7 +19,7 @@ def zernfringe2nm(j0, numskip):  #technically fringe-1, so starting at j = 0
     m = (1-temp2)*temp1/2 - temp2*(temp1+1)/2
     n = 2*(d-1)-np.abs(m)     
     
-    return n, m
+    return np.int16(n), np.int16(m)
     
 #stolen from https://blog.joey-dumont.ca/zernike-polynomials-coefficients/
 def zernnoll2nm(j0, numskip):  #technically noll -1, so starting at j = 0
@@ -47,13 +48,19 @@ def zernansi2nm(j0, numskip):
 def zernnm2ansi(nm, offset):
     n, m = nm
     j = (n*(n+2)+m)/2
-    return np.int32(j-offset)
+    return np.int16(j-offset)
+
+def zernj2nm(j, indexing = "Noll", numskip = 3):
+    if indexing == "Noll": return zernnoll2nm(j, numskip)
+    if indexing == "ANSI": return zernansi2nm(j, numskip)
+    if indexing == "Fringe": return zernfringe2nm(j, numskip)
+    if indexing == "Wyant": return zernfringe2nm(j, numskip)
     
 
 def zernfun(j, dim, pupilSize, pixelSize, indexing, rotang, numskip):
     
     r, theta, inds = pupil(dim, pupilSize, pixelSize, rotang)
-    n, m = indexing(j, numskip)
+    n, m = zernj2nm(j, indexing, numskip)
 
     Rmn = zern_r(n, m, r)
     ang = zern_theta(m, theta)
@@ -116,7 +123,7 @@ def normalize(j, numskip = 3):
     A = (2/eps(m))*(n+1)
     return np.float64(A)
 
-def get_zern(dsize, pupilSize, pixelSize, num_c, rotang = 0, numskip = 3, p2 = False, indexing = zernnoll2nm):
+def get_zern(dsize, pupilSize, pixelSize, num_c, rotang = 0, numskip = 3, p2 = False, indexing = "Noll"):
     
     zern = np.array([zernfun(i, dsize, pupilSize, pixelSize, indexing, rotang, numskip) 
                      for i in range(num_c)])

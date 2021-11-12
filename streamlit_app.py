@@ -16,12 +16,14 @@ import matplotlib.pyplot as plt
 from src.image_functions import get_theta, scl_imgs, ift, sft, defocus
 from src.fast_fft import Fast_FFTs
 from src.zern import normalize
-from src.zern import zernnoll2nm as zn2nm
+from src.zern import zernj2nm as j2nm
 from src.sim_cell import cell_multi
 from src.streamlit_functions import run_estimation
 from PIL import Image
 import pandas as pd
+from skimage.transform import downscale_local_mean as dlm
 
+offsets = {"Noll": 4, "ANSI": 3, "Fringe": 4, "Wyant": 3}
 st.set_page_config(layout="wide")
 st.title('Phase Diversity')
 
@@ -43,15 +45,16 @@ with st.sidebar.expander(label = "Algorithm Settings"):
     units = st.radio(label = "Aberration Units", options = ("um", "waves", "radians"))
     algo = st.radio(label = "Algorithm Type:", options = ("Poisson", "Gaussian"))
     div_type = st.radio(label = "Diversity Phase Type:", options = ("Defocus", "Zernike Polynomials"))
-    if div_type == "Zernike Polynomials":
-        indexing = st.radio(label = "Zernike Indexing:", options = ("Noll", "ANSI", "Fringe", "Wyant"))
+    indexing = st.radio(label = "Zernike Indexing:", options = ("Noll", "ANSI", "Fringe", "Wyant"), index = 0)
+    ds = st.checkbox(label = "Use downscaling?", value = False)
+                
 
 num_phases = [None for i in range(num_imgs)]
 use_im = [None for i in range(num_imgs)]
 imgs = [None for i in range(num_imgs)]
 defocuses = [None for i in range(num_imgs)]
 zern_idx = [None for i in range(num_imgs)]
-zern_str = [None for i in range(num_imgs)]
+zern_amp = [None for i in range(num_imgs)]
 if 'cs' not in st.session_state:
     st.session_state.cs = []
 
@@ -69,44 +72,58 @@ for i in range(num_imgs):
             st.write(f"Image {i+1} uploaded successfully!")
         
         # use image yes/no
-        use_im[i] = st.checkbox(label = "Use Image in Estimation?", key = f"checkbox{i}", value = True)
+        use_im[i] = st.checkbox(label = "Use Image in Estimation?",
+                                key = f"checkbox{i}", value = True)
         
         # specify diversity phases
         if div_type == "Defocus":
-            defocuses[i] = st.number_input(label = f"Defocus Amount ({units})", value = 0.0, key = f"defocus{i}")
+            defocuses[i] = st.number_input(label = f"Defocus Amount ({units})",
+                                           value = 0.0, key = f"defocus{i}")
 
         if div_type == "Zernike Polynomials":
-            num_phases[i] = int(st.number_input(label = "# of diversity phases", min_value = 1, step = 1, value = 1, key = f"num_phases{i}"))
+            num_phases[i] = int(st.number_input(label = "# of diversity phases",
+                                                min_value = 1, step = 1,value = 1,
+                                                key = f"num_phases{i}"))
 
             zern_idx[i] = [None for i in range(num_phases[i])]
-            zern_str[i] = [None for i in range(num_phases[i])]
+            zern_amp[i] = [None for i in range(num_phases[i])]
 
             for j in range(num_phases[i]):
-                zern_idx[i][j] = st.number_input(label = f"Diversity Phase {j+1} Polynomial Index ({indexing})", min_value = 4, value = 4, step = 1, key = f"diversity_index{i},{j}")
-                n_temp, m_temp = zn2nm(zern_idx[i][j], -1)
+                zern_idx[i][j] = st.number_input(label = f"Diversity Phase {j+1} Polynomial Index ({indexing})",
+                                                 min_value = offsets[indexing], value = offsets[indexing], step = 1,
+                                                 key = f"diversity_index{i},{j}") - offsets[indexing]
+
+
+                n_temp, m_temp = j2nm(zern_idx[i][j], indexing)
                 st.write(f"n = {n_temp}, m = {m_temp}")
-                zern_str[i][j] = st.number_input(label = f"Diversity Phase {j+1} Amount ({units})", value  = 0.0, key = f"diversity{i},{j}")
+                zern_amp[i][j] = st.number_input(label = f"Diversity Phase {j+1} Amplitude ({units})",
+                                                 value  = 0.0, key = f"diversity{i},{j}")
         
 estimate_button = st.button("Run Estimation")
 
 pupilSize = NA/l
 Sk0 = np.pi*(pixelSize*pupilSize)**2
 l2p = 2*np.pi/l #length to phase
-def_con = {"um":1.0, "waves":l, "radians": 1.0/l2p}
-zern_con = {"um":l2p, "waves":2*np.pi, "radians":1.0}
+def_con = {"um":1.0, "waves":l, "radians":1.0/l2p} #need to convert input units to um
+zern_con = {"um":l2p, "waves":2*np.pi, "radians":1.0} #need to convert input units to radians
 
 if estimate_button:
     with st.spinner("Calculating ..."):
         
         im_inds = [i for i in range(len(use_im)) if use_im[i] == True]
         imgs_temp = np.array([imgs[i] for i in im_inds])
-    
-        imsize = imgs[0].shape[0]
-        ff = Fast_FFTs(imsize, len(im_inds), 1)
-    
-        zern, R, Theta, inds = get_zern(imsize, pupilSize, pixelSize, num_c)
+        num_imgs_temp = len(im_inds)
         
-        c0 = np.zeros((num_c))+1e-10
+        pxf = 1.0
+        if ds:
+            imgs_temp = dlm(imgs_temp, (1, 2, 2))
+            pxf = 2.0
+    
+        imsize = imgs_temp[0].shape[0]
+        ff = Fast_FFTs(imsize, num_imgs_temp, 1)
+    
+        zern, R, Theta, inds = get_zern(imsize, pupilSize, pixelSize*pxf, num_c, rotang = rotang, indexing = indexing)
+        
         
         if div_type == "Defocus":
             def_vals = def_con[units]*np.array([defocuses[i] for i in im_inds])
@@ -114,25 +131,37 @@ if estimate_button:
             
         if div_type == "Zernike Polynomials":
             
-            j_max = max([max(zern_idx[i]) for i in range(num_imgs)])
-            theta0 = np.zeros((num_imgs, j_max))
+            j_max = max([max(zern_idx[i]) for i in range(num_imgs)])+1
+            theta0 = np.zeros((num_imgs_temp, j_max))
     
-            for i in range(num_imgs):
+            for i, idx in enumerate(im_inds):
                 for j in range(num_phases[i]):
-                    theta0[i][zern_idx[i][j]] = zern_str[i][j]
+                    theta0[i][zern_idx[idx][j]] = zern_amp[idx][j]*zern_con[units]
     
-            get_theta(theta0, zern)
+            theta1 = get_theta(theta0, zern)
     
+        c0 = np.zeros((num_c))+1e-10
         if algo == "Poisson":
             c = iter_p(zern, inds, imgs_temp, theta1, Sk0, c0.copy(), ff)[0]
     
         if algo == "Gaussian":
             c = iter_g0(zern, inds, imgs_temp, theta1, Sk0, c0.copy(), ff, 100)[0]
-            
-        st.session_state.cs.append(c)
+        
+        #TODO: figure this out later
+        # if st.session_state.cs != []:
+        #     if len(st.session_state.cs[0]) > len(c):
+                
+        st.session_state.cs.append(c/zern_con[units])
 
-df = pd.DataFrame(data = st.session_state.cs, columns = [[f"{j}" for j in range(num_c)],
-                                                         [f"{zn2nm(j, 3)[1]}, {zn2nm(j, 3)[0]}" for j in range(num_c)]])
+j_temp = np.arange(num_c)
+n_temp, m_temp = j2nm(j_temp, indexing)
+df = pd.DataFrame(data = st.session_state.cs, columns = [[f"j={j+offsets[indexing]}" for j in j_temp],
+                                                         [f"n={n}, m={m}" for n, m in zip(n_temp, m_temp)]])
 
-with st.expander("Previous Results"):
-    st.table(df.style.format("{:.2f}"))
+#TODO: make separate radio buttons for table zernike indexing and units
+# table_units = st.radio(label = "Table Units", options = ("um", "waves", "radians"))
+# table_indexing = st.radio(label = "Zernike Indexing:", options = ("Noll", "ANSI", "Fringe", "Wyant"), index = 0)
+st.write(f"Table values are in units of {units}")
+st.table(df.style.format("{:.2f}"))
+    
+#TODO: add plotting of some sort
