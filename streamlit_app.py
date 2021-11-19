@@ -42,7 +42,7 @@ with st.sidebar.expander(label = "Microscope Settings"):
 with st.sidebar.expander(label = "Algorithm Settings"):
     num_c = int(st.number_input(label = "# of orders to estimate", min_value = 2, step = 1, value = 12))
     num_imgs = int(st.number_input(label = "# of images", min_value = 2, step = 1, value = 3))
-    units = st.radio(label = "Aberration Units", options = ("um", "waves", "radians"))
+    units = st.radio(label = "Aberration Units", options = ("um", "waves", "radians")) #TODO: Make it so that it doesn't erase fields when units are changed
     algo = st.radio(label = "Algorithm Type:", options = ("Poisson", "Gaussian"))
     div_type = st.radio(label = "Diversity Phase Type:", options = ("Defocus", "Zernike Polynomials"))
     indexing = st.radio(label = "Zernike Indexing:", options = ("Noll", "ANSI", "Fringe", "Wyant"), index = 0)

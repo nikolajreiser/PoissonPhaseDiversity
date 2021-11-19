@@ -11,11 +11,11 @@ import numpy as np
 from functions import load_data
 
 fig, ax = plt.subplots()
-num_points = 10
+num_points = 100
 abmag0 = 2
 l = .532
 
-div_mags, errs_g, errs_p, errs_g_2, errs_p_2 = load_data('sweep_diversity_2v3_ob4_2')
+div_mags, errs_g, errs_p, errs_g_2, errs_p_2 = load_data('sweep_diversity_2v3_ob4_1')
 
 div_mags /= l #convert from um back to waves
 

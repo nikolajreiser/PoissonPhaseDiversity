@@ -20,7 +20,7 @@ ax.errorbar(abmags, errs_p.mean(axis = 1), c = 'blue', yerr = errs_p.std(axis = 
 
 
 fig.legend(loc = 'upper left', bbox_to_anchor=(.125, .88))
-ax.set_xlabel(r"Initial Wavefront RMSE ($\lambda$)")
+ax.set_xlabel(r"Initial Wavefront RMS ($\lambda$)")
 ax.set_ylabel(r"RWE ($\lambda$)")
 ax.set_yticks(yticks)
 

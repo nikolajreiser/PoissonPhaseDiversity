@@ -65,9 +65,9 @@ print(obname)
 
 
 
-div_mags = np.linspace(3, 0, 10, False) #in units of waves
+div_mags = np.linspace(10, 0, 20, False) #in units of waves
 div_mags *= l #convert waves to um
-num_points = 10
+num_points = 100
 
 errs_g = np.zeros((len(div_mags), num_points))
 errs_p = np.zeros((len(div_mags), num_points))
@@ -75,7 +75,7 @@ errs_p = np.zeros((len(div_mags), num_points))
 errs_g_2 = np.zeros((len(div_mags), num_points))
 errs_p_2 = np.zeros((len(div_mags), num_points))
 
-abmag0 = 2
+abmag0 = 4
 abmag1 = abmag0/2
 
 
