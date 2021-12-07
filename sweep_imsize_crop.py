@@ -37,7 +37,7 @@ show = False
 num_c = 12
 
 num_theta = num_c
-div_mag = 2
+div_mag = 3
 div_mag *= l #convert waves to um
 tm = np.array([-div_mag, div_mag, 0])
 
@@ -89,7 +89,7 @@ ob_1024 = ob[fs-1024:fs+1024, fs-1024:fs+1024]
 abmag0 = 2
 abmag1 = abmag0/2
 
-num_points = 10
+num_points = 100
 errs_gn = np.zeros((5, num_points))
 errs_gd = np.zeros((5, num_points))
 errs_pn = np.zeros((5, num_points))

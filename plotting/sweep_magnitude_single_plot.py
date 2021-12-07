@@ -10,9 +10,9 @@ import numpy as np
 from functions import load_data
 
 
-abmags, errs_g, errs_p = load_data('sweep_magnitude_single_ob4')
+abmags, errs_g, errs_p = load_data('sweep_magnitude_single_ob3')
 num_points = 10
-yticks = np.arange(0, 5, .5)
+yticks = np.arange(0, 3, .5)
 fig, ax = plt.subplots()
 
 ax.errorbar(abmags, errs_g.mean(axis = 1), c = 'orange', yerr = errs_g.std(axis = 1)/np.sqrt(num_points), label = 'Gaussian')

@@ -29,7 +29,7 @@ def cell(size, n = 20, a = .1, b = .15, e = 1, rotang = 0, texture_sigma = 2, ed
     b : TYPE: double, optional
         DESCRIPTION: Boundary point angle variability. The default is .1.
     e : TYPE: double, optional
-        DESCRIPTION. Kind of eccentricity. The default is 1.
+        DESCRIPTION. Eccentricity (kind of). The default is 1.
     rotang : TYPE: double, optional
         DESCRIPTION. Angle of cell. Only matters if e != 1. The default is 0.
     texture_sigma : TYPE: double, optional

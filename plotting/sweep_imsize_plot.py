@@ -10,8 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from functions import load_data
 
-errs_pn, errs_pd, errs_gn, errs_gd, time_pn, time_pd, time_gn, time_gd = load_data('sweep_imsize_scale')
-# errs_pn, errs_pd, errs_gn, errs_gd, time_pn, time_pd, time_gn, time_gd = load_data('sweep_imsize_crop')
+# errs_pn, errs_pd, errs_gn, errs_gd, time_pn, time_pd, time_gn, time_gd = load_data('sweep_imsize_scale')
+errs_pn, errs_pd, errs_gn, errs_gd, time_pn, time_pd, time_gn, time_gd = load_data('sweep_imsize_crop')
 
 
 ticks = [r'$64^2$', r'$128^2$', r'$256^2$', r'$512^2$', r'$1024^2$']

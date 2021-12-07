@@ -48,7 +48,7 @@ dim = (imsize,imsize)
 ff = Fast_FFTs(imsize, num_imgs, 1)
 
 
-div_mag = 1
+div_mag = 3
 div_mag *= l #convert waves to um
 
 abmag0 = 2
