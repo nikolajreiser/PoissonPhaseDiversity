@@ -10,7 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from functions import load_data
 
-sample_imgs, error_decon, error_decon_single, error_im_aber, error_im_corr, noise_vals, errs_p = load_data('sweep_deconv_2')
+#remove sample_images if file isn't available
+sample_imgs, error_decon, error_decon_single, error_im_aber, error_im_corr, noise_vals, errs_p = load_data('sweep_deconv_div_mag_1')
 num_points = 10
 
 fig, ax = plt.subplots()

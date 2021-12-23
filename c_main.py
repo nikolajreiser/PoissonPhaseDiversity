@@ -9,14 +9,13 @@ Created on Sat Sep 19 12:03:32 2020
 import numpy as np
 from numpy.random import rand, seed
 from numpy.linalg import norm
-from plotting import imshow, err
-from iterate_poisson import iter_p
-from iterate_gaussian import iter_g, iter_g2, iter_g0, iter_g3, iter_g_lin
-from sim_im import sim_im, sim_im_2, sim_im_3d_2, sim_im_3d_3, add_noise, create_ob
-from zern import pupil, zernfun, normalize
+from src.iterate_poisson import iter_p
+from src.sim_im import sim_im, sim_im_2, add_noise
+from src.zern import get_zern, normalize
 import matplotlib.pyplot as plt
-from image_functions import fft2, sft, get_H2, ift, ift2, scl_imgs
-from fast_fft import Fast_FFTs
+from src.image_functions import fft2, sft, get_H2, ift, ift2, scl_imgs, errA, defocus
+from src.fast_fft import Fast_FFTs
+from src.sim_cell import cell_multi
 
 from cuda.c_functions_py import CuFunc
 
@@ -27,14 +26,13 @@ l = .532
 pupilSize = NA/l
 Sk0 = np.pi*(pixelSize*pupilSize)**2
 l2p = 2*np.pi/l #length to phase
-dsize = 512
+dsize = 256
 dim = (dsize, dsize)
 num_imgs = 3
-num_phi = 8
+num_phi = 12
 rotang = 0
 
-R, Theta, inds = pupil(dsize, pupilSize, pixelSize, rotang)
-zern = np.array([zernfun(i, dsize, pupilSize, pixelSize) for i in range(num_phi)])
+zern, R, Theta, inds = get_zern(dsize, pupilSize, pixelSize, num_phi)
 num_inds = len(inds[0])
 cu_inds = np.int32(inds[0]*dsize+inds[1])
 ff = Fast_FFTs(dsize, num_imgs, 1)
@@ -74,40 +72,35 @@ phi /= np.linalg.norm(phi)
 phi *= 4
 
 
-ob = create_ob(dim)
-hob = ob[10, dsize//2:-dsize//2, dsize//2:-dsize//2]
+ob = cell_multi(dsize*2, 1000, (30, 60), e = .1, overlap = .5)
+hob = ob[dsize//2:-dsize//2, dsize//2:-dsize//2]
 hob = np.ascontiguousarray(hob)
 F = fft2(hob)
-show = False
+show = True
 
 theta0 = np.zeros((num_imgs, num_phi))
-div_mag = .5
-div_mag *= l2p
-
-theta0[1,0] = div_mag
-theta0[2,0] = -div_mag
-
-texp = np.sum(theta0[:,:,None]*zern[None,:,:], axis = 1)
-theta = np.exp(1j*texp)
+RI = 1.33
+div_mag = 3
+div_mag *= l
+theta = defocus(np.array([-div_mag, div_mag, 0]), R, inds, NA, l, RI)
 
 
 # d_phi = cf.load_array(phi)
 d_theta = cf.load_array(np.complex64(theta))
 d_F = cf.load_array(np.complex64(F))
 
-imgs0 = sim_im(ob, dim, phi, num_imgs, theta, zern, R, inds)
-
-
+imgs0 = sim_im_2(ob, dim, phi, num_imgs, theta, zern, R, inds)
+snr, imgs0 = add_noise(imgs0, num_photons = 500, dark_noise = 1, read_noise = 2)
 imgs0 = scl_imgs(imgs0)
 
 f = np.ones((dsize, dsize))
 
 num_updates = 1
-num_c = 8
+num_c = 12
 zern = zern[:num_c]
 c0 = np.zeros((num_c))+1e-10
 # c0 = np.random.rand(num_c)
-# c2, cost2, num_iter2, sss = iter_p(zern, inds, imgs0, theta, Sk0, c0.copy(), ff, True)
+c2, cost2, num_iter2, sss = iter_p(zern[:num_c], inds, imgs0, theta, Sk0, c0.copy(), ff, show)
 
 d_c = cf.load_array(np.float32(c0))
 dU = normalize(np.arange(num_c))*np.pi/Sk0
@@ -143,6 +136,7 @@ H = cf.cu_unload_array_complex(l3d, d_H)
 # G = cf.cu_unload_array_complex2(h3d, d_G)
 # Q = cf.cu_unload_array_complex2(h3d, d_Q)
 
-err(c1, phi)
-# err(c2, phi)
+errA(c1, phi)
+errA(c2, phi)
+errA(c1, c2)
 

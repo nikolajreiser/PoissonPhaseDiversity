@@ -35,6 +35,7 @@ def get_theta(theta_coef, zern):
 
 def defocus(z, R, inds, NA, l, RI):
 
+    #Z IS IN UNITS OF UM (OR WHATEVER UNITS WAVELENGTH (l) IS IN)
     gamma = np.zeros(len(inds))
     gamma = (2*np.pi*RI/l)*np.sqrt(1-(NA*R/RI)**2)
     

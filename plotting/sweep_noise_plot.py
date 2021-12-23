@@ -11,6 +11,7 @@ import numpy as np
 from functions import load_data
 
 noise_vals, errs_g, errs_p, read_noises = load_data('sweep_noise_ob4')
+yticks = np.arange(.2, 2, .2)
 num_points = 100
 
 
@@ -27,3 +28,4 @@ fig.legend(loc = 'upper right', bbox_to_anchor=(.9, .88))
 ax.set_xlabel("# photons/pixel")
 ax.set_xscale("log")
 ax.set_ylabel(r"RWE ($\lambda$)")
+ax.set_yticks(yticks)

@@ -25,7 +25,7 @@ class CuFunc:
         self.dsize3d = num_imgs*self.dsize2d
         self.hsize3d = num_imgs*self.hsize2d
         
-        lib = ctypes.cdll.LoadLibrary('./c_functions.so')
+        lib = ctypes.cdll.LoadLibrary('cuda/c_functions.so')
         self.lib = lib
         
         self.c_init_array = lib.init_array_host

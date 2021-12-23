@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 from src.image_functions import get_theta, scl, ift, sft, defocus, errA, imshow
 from src.fast_fft import Fast_FFTs
 from src.zern import normalize
-from src.sim_cell import cell_multi
+from src.sim_cell import cell_multi, cell_multi_3D
 from skimage.transform import downscale_local_mean as dlm
 
 
@@ -43,7 +43,7 @@ imsize = 512
 num_c = 12
 
 num_theta = num_c
-div_mag = 2 #for defocus, this is distance from focal plane in waves
+div_mag = 3 #for defocus, this is distance from focal plane in waves
 div_mag *= l #convert waves to um
 # div_mag *= l2p*NA**2/(4*RI) #convert um to radians. Extra factor of NA^2/4RI is because of Zernike defocus approximation (see 10.1364/JOSAA.37.000016)
 theta0 = np.zeros((num_imgs, num_theta))
@@ -72,18 +72,18 @@ theta0[1,0] = -div_mag
 
 zern0, R0, Theta, inds0, = get_zern(dsize, pupilSize, pixelSize, num_phi)
 # theta = get_theta(theta0, zern0)
-theta = defocus(np.array([-div_mag, div_mag, 0]), R0, inds0, NA, l, RI)
+theta = defocus(np.array([0, div_mag, -div_mag]), R0, inds0, NA, l, RI)
 
 zern, R, Theta, inds = get_zern(imsize, pupilSize, pixelSize, num_c)
 # theta1 = get_theta(theta0, zern[:num_c])
-theta1 = defocus(np.array([-div_mag, div_mag, 0]), R, inds, NA, l, RI)
+theta1 = defocus(np.array([0, div_mag, -div_mag]), R, inds, NA, l, RI)
 
 ff = Fast_FFTs(imsize, num_imgs, 1)
 ff2 = Fast_FFTs(imsize, 2, 1)
 
-
+ob = cell_multi_3D(dsize*2, 400, (30, 60), 21, e = .7, overlap = .05)#[5]
 # ob = cell_multi(dsize*2, 300, (10, 60), e = .7, overlap = .2)
-ob = cell_multi(dsize*2, 400, (30, 60), e = .7, overlap = .05)
+# ob = cell_multi(dsize*2, 400, (30, 60), e = .7, overlap = .05)
 # ob_1024 = cell_multi(1024*2, 1600, (30, 60), e = .7, overlap = .05)
 
 # ob = dlm(ob_1024, (2,2))
@@ -96,6 +96,7 @@ ob = cell_multi(dsize*2, 400, (30, 60), e = .7, overlap = .05)
 show = True
 abmag0 = 2
 abmag1 = abmag0/2
+
 
 phi0 = (rand(num_c)*2-1)
 phi0 /= norm(phi0*np.sqrt(normalize(np.arange(num_c))))
@@ -123,7 +124,7 @@ imgs0 = sim_im_2(ob, dim0, phi, num_imgs, theta, zern0, R0, inds0)
 # imgs0 = sim_im(ob, dim0, phi, num_imgs, theta, zern0, R0, inds0)
 # imgs0 = sim_im_3d_2(ob, dim0, phi, num_imgs, theta, zern0, R0, inds0)
 # imgs0 = sim_im_3d_1(ob, dim0, phi, num_imgs, theta, zern0, R0, inds0)
-# snr, imgs0 = add_noise(imgs0, num_photons = num_photons, dark_noise = 100, read_noise = 20)
+# snr, imgs = add_noise(imgs0, num_photons = num_photons, dark_noise = 100, read_noise = 20)
 snr, imgs = add_noise(imgs0, num_photons = num_photons, dark_noise = 1, read_noise = 2)
 # imgs0[-1] /= pf
 # print(f"SNR: {snr:.2f}")

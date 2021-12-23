@@ -569,7 +569,7 @@ DTYPE_R* sim_im(int num_imgs, int length, int num_c, int num_inds,
     //printf("check: %.2e\n", result);
 
     return h_g;
-}z
+}
 
 void update_ob_poisson_cuda(int num_imgs, int length, int num_c, int num_inds, int num_updates,
                 DTYPE_C* F, DTYPE_C* theta, DTYPE_R* c, DTYPE_R* zern, 
@@ -601,15 +601,15 @@ void update_ob_poisson_cuda(int num_imgs, int length, int num_c, int num_inds, i
 
     clock_t start = clock(), diff;
 
-    int max_iter = 300;
-    int min_iter = 10;
-    DTYPE_R eps = 1e-2;
+    int max_iter = 1000;
+    int min_iter = 200;
+    DTYPE_R eps = 1e-3;
     DTYPE_R norm_g = 1+eps;
     int n_iter = 0;
     
     DTYPE_R L0 = -100000000000000000;
     DTYPE_R L1 = 0;
-
+    
     
     while(true){
 

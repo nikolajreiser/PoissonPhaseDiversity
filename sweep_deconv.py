@@ -54,7 +54,7 @@ dim = (imsize,imsize)
 ff = Fast_FFTs(imsize, num_imgs, 1)
 
 
-div_mag = 2
+div_mag = 1
 div_mag *= l #convert waves to um
 
 obname = "cells"
@@ -177,4 +177,4 @@ for i, noise_val in enumerate(noise_vals):
             sample_imgs[4,i] = img_perfect
         
 
-save_data('sweep_deconv_2', sample_imgs, error_decon, error_decon_single, error_im_aber, error_im_corr, noise_vals, errs_p)
+save_data(f'sweep_deconv_div_mag_{div_mag}', sample_imgs, error_decon, error_decon_single, error_im_aber, error_im_corr, noise_vals, errs_p)

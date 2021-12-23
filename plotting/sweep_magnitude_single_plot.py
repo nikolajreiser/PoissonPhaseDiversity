@@ -10,8 +10,8 @@ import numpy as np
 from functions import load_data
 
 
-abmags, errs_g, errs_p = load_data('sweep_magnitude_single_ob3')
-num_points = 10
+abmags, errs_g, errs_p = load_data('sweep_magnitude_single_ob4')
+num_points = 100
 yticks = np.arange(0, 3, .5)
 fig, ax = plt.subplots()
 

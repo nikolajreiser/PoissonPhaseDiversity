@@ -40,7 +40,7 @@ imsize = 256
 num_c = 12
 
 num_theta = num_c
-div_mag = 1
+div_mag = 3
 div_mag *= l #convert from waves to um
 
 zern, R, Theta, inds = get_zern(imsize, pupilSize*2, pixelSize, num_c)

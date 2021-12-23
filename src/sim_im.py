@@ -45,51 +45,73 @@ def sim_im(ob3d, dim, phi, num_imgs, theta, zern, R, inds, trim = True):
     return imgs
 
 
-def sim_im_2(ob3d, dim, phi, num_imgs, theta, zern, R, inds):
+def sim_im_2(ob, dim, phi, num_imgs, theta, zern, R, inds):
     #create object for testing
     
-    y = dim[0]
-    x = dim[1]
-        
     
-    if len(ob3d.shape) == 3 :
-        mid_plane = ob3d.shape[0]//2
-        ob = ob3d[mid_plane]
-    else:
-        ob = ob3d
-    
-    # ob = data.grass()
-    # ob = np.float64(ob)
     ob -= ob.min()
     ob/=ob.max()
+    
+    if len(ob.shape) == 2:
+        y = dim[0]
+        x = dim[1]
+    
+        imgs = np.zeros((num_imgs, y, x))
         
-    imgs = np.zeros((num_imgs, y, x))
+        F = fft2(ob)
+        H = get_H2(zern, inds, dim, theta, phi)
+        s = np.abs(ift(H))**2
+        s = sft(np.pad(sft(s), ((0,0), (x//2, x//2), (y//2, y//2))))
+        S = fft2(s)
+        g = ift2(F*S)
+        
+        # from plotting import imshow
+        # a = np.zeros((256, 256, 3))
+        # a[:,:,0] = sft(s[-1])
+        # a[:,:,1] = sft(s[-1])
+        # a[:,:,2] = sft(s[-1])
+        # a -= a.min()
+        # a /= a.max()
+        
+        # a[64:-64, 64::128, 0] = 1 
+        # a[64:-64, 64::128, 1:] = 0 
+        # a[64::128, 64:-64, 0] = 1
+        # a[64::128, 64:-64, 1:] = 0
     
-    F = fft2(ob)
-    H = get_H2(zern, inds, dim, theta, phi)
-    s = np.abs(ift(H))**2
-    s = sft(np.pad(sft(s), ((0,0), (x//2, x//2), (y//2, y//2))))
-    S = fft2(s)
-    g = ift2(F*S)
     
-    # from plotting import imshow
-    # a = np.zeros((256, 256, 3))
-    # a[:,:,0] = sft(s[-1])
-    # a[:,:,1] = sft(s[-1])
-    # a[:,:,2] = sft(s[-1])
-    # a -= a.min()
-    # a /= a.max()
+        
+        # imshow(a)
     
-    # a[64:-64, 64::128, 0] = 1 
-    # a[64:-64, 64::128, 1:] = 0 
-    # a[64::128, 64:-64, 0] = 1
-    # a[64::128, 64:-64, 1:] = 0
+        imgs = g[:,x//2:-x//2, y//2:-y//2]
+        
+    if len(ob.shape) == 3:
+        num_planes, x, y = ob.shape
+    
+        mid_plane = num_planes//2
+        x = x//2
+        y = y//2
+        
+        imgs = np.zeros((num_imgs, x, y))
+        
+        F = fft2(ob)
+    
+        H0 = get_H2(zern, inds, dim, theta, phi)
+        H = np.zeros(H0.shape, dtype = np.complex128)
+        
+        pixelSize = .096
+        NA = 1.2
+        l = .532
+        RI = 1.33
+    
+        for j in range(num_planes):
+            z = (j - mid_plane)*pixelSize
+            H[:,inds[0],inds[1]] = H0[:,inds[0],inds[1]]*defocus(z, R, inds, NA, l, RI)
+            s = np.abs(ift(H))**2
+            s = sft(np.pad(sft(s), ((0,0), (x//2, x//2), (y//2, y//2))))
+            S = fft2(s)
+            g = ift2(F[j]*S)
+            imgs += g[:,x//2:-x//2, y//2:-y//2]
 
-
-    
-    # imshow(a)
-
-    imgs = g[:,x//2:-x//2, y//2:-y//2]
      
     return imgs
 
@@ -139,7 +161,6 @@ def sim_im_3(ob, dim, phi, num_imgs, theta, zern, R, inds, zern_mag, low_freq = 
     imgs = imgs[:,x//2:-x//2, y//2:-y//2]
      
     return imgs
-
 
 def add_noise(imgs, num_photons = 1000, dark_noise = 50, read_noise = 10, qe = .6):
     
